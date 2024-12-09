@@ -21,21 +21,27 @@ def analyze_csv(file_path):
                 tags.append("open")
 
             kommen_index = headers.index('kommen1')
-            first_kommen = filled_cells[kommen_index]
+            first_kommen = row[kommen_index]
             last_filled = filled_cells[-1]
 
             if first_kommen and last_filled:
-                first_kommen_time = datetime.strptime(first_kommen, '%H:%M:%S')
-                last_filled_time = datetime.strptime(last_filled, '%H:%M:%S')
-                if last_filled_time - first_kommen_time > timedelta(hours=7, minutes=48):
-                    tags.append("Überstunde")
+                try:
+                    first_kommen_time = datetime.strptime(first_kommen, '%H:%M:%S')
+                    last_filled_time = datetime.strptime(last_filled, '%H:%M:%S')
+                    if last_filled_time - first_kommen_time > timedelta(hours=7, minutes=48):
+                        tags.append("Überstunde")
+                except ValueError:
+                    pass
 
             for i in range(kommen_index, len(headers) - 1, 2):
                 if headers[i].startswith('kommen') and headers[i + 1].startswith('gehen'):
-                    kommen_time = datetime.strptime(row[i], '%H:%M:%S')
-                    gehen_time = datetime.strptime(row[i + 1], '%H:%M:%S')
-                    if gehen_time - kommen_time > timedelta(hours=6):
-                        tags.append("pausenlos")
+                    try:
+                        kommen_time = datetime.strptime(row[i], '%H:%M:%S')
+                        gehen_time = datetime.strptime(row[i + 1], '%H:%M:%S')
+                        if gehen_time - kommen_time > timedelta(hours=6):
+                            tags.append("pausenlos")
+                    except ValueError:
+                        pass
 
             row.extend(tags)
             rows.append(row)
